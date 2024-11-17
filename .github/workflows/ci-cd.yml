@@ -21,14 +21,17 @@ jobs:
       with:
         dotnet-version: '8.x'  # Use the .NET version that your Blazor app requires
 
+    - name: Change directory to BlazorApp
+      run: cd BlazorApp  # Change the directory to the folder containing your .csproj or .sln file
+
     - name: Restore dependencies
-      run: dotnet restore  # Restore NuGet dependencies
+      run: dotnet restore BlazorApp.csproj  # Restore NuGet dependencies for the Blazor project
 
     - name: Build the Blazor app
-      run: dotnet build --configuration Release  # Build the app in Release configuration
+      run: dotnet build BlazorApp.csproj --configuration Release  # Build the app in Release configuration
 
     - name: Publish the Blazor app to a folder
-      run: dotnet publish -c Release -o ${{ github.workspace }}/output  # Publish app to 'output' folder
+      run: dotnet publish BlazorApp.csproj -c Release -o ${{ github.workspace }}/output  # Publish app to 'output' folder
 
   deploy:
     runs-on: ubuntu-latest
@@ -44,4 +47,3 @@ jobs:
         branch: gh-pages  # The branch where the app will be deployed
         folder: ${{ github.workspace }}/output/www  # Folder containing the published Blazor app's static files
         token: ${{ secrets.GITHUB_TOKEN }}  # GitHub token for authentication
-
