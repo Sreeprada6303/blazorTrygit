@@ -1,1 +1,37 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main   # Trigger workflow on changes to the `main` branch.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Choose your environment (Ubuntu for Linux-based runner)
+    
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v3
+
+    - name: Set up .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0'  # Adjust the version according to your Blazor project SDK version
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build the Blazor project
+      run: dotnet build --configuration Release
+
+    - name: Publish the Blazor app
+      run: dotnet publish -c Release -o ./output
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages      # The branch where the app will be deployed
+        folder: ./output      # The folder containing the published files (from the previous step)
+        token: ${{ secrets.GITHUB_TOKEN }}  # GitHub token for authentication (automatically available in the repo)
+
 
