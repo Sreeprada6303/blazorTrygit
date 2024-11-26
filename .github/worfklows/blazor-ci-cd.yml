@@ -1,0 +1,58 @@
+name: Blazor CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the 'main' branch
+  pull_request:
+    branches:
+      - main  # Trigger on pull requests targeting the 'main' branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # The environment that the job will run on (Ubuntu)
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up .NET SDK (for Blazor)
+      - name: Set up .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0'  # Specify the .NET version (adjust as needed)
+
+      # Step 3: Restore dependencies (e.g., NuGet)
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Step 4: Build the Blazor app
+      - name: Build the Blazor app
+        run: dotnet build --configuration Release
+
+      # Step 5: Run tests (if applicable)
+      - name: Run tests
+        run: dotnet test --configuration Release
+
+      # Step 6: Publish the Blazor app (for deployment)
+      - name: Publish the Blazor app
+        run: dotnet publish --configuration Release --output ./publish
+
+  deploy:
+    runs-on: ubuntu-latest  # The environment that the job will run on (Ubuntu)
+
+    needs: build  # Ensure this job only runs after the 'build' job is successful
+
+    steps:
+      # Step 1: Checkout the repository code again (in case the deploy job runs on a fresh environment)
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Deploy the app (Example using Azure for deployment)
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_APP_NAME }}  # Set this as a GitHub secret
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}  # Set this as a GitHub secret
+          package: './publish'
